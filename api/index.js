@@ -1,17 +1,20 @@
-const serverless = require('@vercel/node'); // provided by Vercel runtime
-require('dotenv').config();
+// api/index.js
 const { connect } = require('../src/db');
 const app = require('../src/app');
 
-let ready = false;
-async function bootstrap() {
-  if (!ready) {
-    await connect(process.env.MONGO_URI);
-    ready = true;
-  }
-}
+let connected = false;
 
 module.exports = async (req, res) => {
-  await bootstrap();
-  return app(req, res);
+  try {
+    if (!connected) {
+      const uri = process.env.MONGO_URI;           // comes from Vercel env
+      await connect(uri);                          // throws if missing/invalid
+      connected = true;
+    }
+    return app(req, res);                          // hand off to Express
+  } catch (err) {
+    console.error('Serverless error:', err);
+    res.statusCode = 500;
+    res.end(JSON.stringify({ status: false, error: 'Internal Server Error' }));
+  }
 };

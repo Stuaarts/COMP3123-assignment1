@@ -30,8 +30,6 @@ exports.login = async (req, res, next) => {
 
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(401).json({ status: false, message: 'Invalid Username and password' });
-
-    // Optional: add JWT here if you want
     res.json({ message: 'Login successful.' });
   } catch (e) { next(e); }
 };

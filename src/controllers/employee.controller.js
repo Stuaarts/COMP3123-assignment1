@@ -47,7 +47,11 @@ exports.update = async (req, res, next) => {
 
 exports.remove = async (req, res, next) => {
   try {
-    await Employee.findByIdAndDelete(req.query.eid);
-    res.status(204).send();
+    const { eid } = req.query;
+    const deleted = await Employee.findByIdAndDelete(eid);
+    if (!deleted) {
+      return res.status(404).json({ status: false, message: 'Not found' });
+    }
+    return res.status(204).send();
   } catch (e) { next(e); }
 };
